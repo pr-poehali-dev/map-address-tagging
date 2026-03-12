@@ -5,19 +5,21 @@ import DetailPanel from '@/components/DetailPanel';
 import FilterBar from '@/components/FilterBar';
 import StatsPanel from '@/components/StatsPanel';
 import ImportModal from '@/components/ImportModal';
+import AddAddressModal from '@/components/AddAddressModal';
 import MapView from '@/components/MapView';
 import Icon from '@/components/ui/icon';
 
 type SideTab = 'table' | 'stats';
 
 export default function Index() {
-  const { addresses, deleteAddress, importAddresses, exportCSV } = useAddresses();
+  const { addresses, addAddress, deleteAddress, importAddresses, exportCSV } = useAddresses();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [search, setSearch] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [sideTab, setSideTab] = useState<SideTab>('table');
   const [showImport, setShowImport] = useState(false);
+  const [showAdd, setShowAdd] = useState(false);
 
   const selected = useMemo(() => addresses.find(a => a.id === selectedId) ?? null, [addresses, selectedId]);
 
@@ -55,8 +57,15 @@ export default function Index() {
 
         <div className="flex items-center gap-2">
           <button
-            onClick={() => setShowImport(true)}
+            onClick={() => setShowAdd(true)}
             className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-foreground text-background hover:bg-foreground/90 transition-colors"
+          >
+            <Icon name="Plus" size={12} />
+            Добавить
+          </button>
+          <button
+            onClick={() => setShowImport(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-border hover:bg-muted transition-colors"
           >
             <Icon name="Upload" size={12} />
             Импорт
@@ -147,6 +156,13 @@ export default function Index() {
 
       {showImport && (
         <ImportModal onImport={importAddresses} onClose={() => setShowImport(false)} />
+      )}
+      {showAdd && (
+        <AddAddressModal
+          onAdd={addr => { addAddress(addr); setSideTab('table'); }}
+          onClose={() => setShowAdd(false)}
+          existingCategories={Array.from(new Set(addresses.map(a => a.category)))}
+        />
       )}
     </div>
   );
